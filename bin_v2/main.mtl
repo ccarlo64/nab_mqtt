@@ -29,6 +29,11 @@
 // BREATH=12;
 // TAICHI=12;
 //var clock_hours = { 0 3600 7200 10800 14400 18000 21600 25200 28800 32400 36000 39600 43200 46800 50400 54000 57600 61200 64800 68400 72000 75600 79200 82800 86400 };;
+var ntp_server;;
+var ntp_srv;;
+var day_life=0;;
+var beepbeep;;
+
 var sleep_clock;;
 var sleep_time;;
 var wakeup_clock;;
@@ -91,6 +96,13 @@ proto getRunState 0;;
 // CC
 proto endSleep 0;;
 proto controlsound 1;;
+
+const midi_plip=
+"\$4d\$54\$68\$64\$00\$00\$00\$06\$00\$00\$00\$01\$01\$e0\$4d\$54\
+\$72\$6b\$00\$00\$00\$2a\$00\$ff\$03\$07\$31\$6e\$6f\$74\$65\$41\
+\$35\$00\$ff\$51\$03\$10\$59\$42\$00\$ff\$58\$04\$04\$02\$18\$08\
+\$00\$c0\$09\$14\$90\$51\$78\$82\$4a\$80\$51\$49\$00\$ff\$2f\$00";;
+
 const cucu="\$ff\$e3\$18\$c4\$00\$0b\$c0\$02\$95\$89\$41\$10\$02\$96\$4a\$9a\$07\$39\$47\$4a\
 \$06\$03\$e2\$00\$c4\$1c\$77\$21\$ca\$3b\$ea\$0c\$14\$0c\$70\$ff\$a8\$30\$b0\$7c\
 \$e1\$77\$ca\$3b\$ff\$c3\$19\$c2\$81\$8e\$0f\$ff\$f9\$73\$ff\$ff\$e5\$0e\$2c\$1f\
@@ -749,6 +761,29 @@ fun set_time s x=
      let (atoi hour)*3600+(atoi min)*60+(atoi sec) -> x in 
 x;;
 
+
+fun cbnetntp msg mac ipfrom= 
+   Secholn "CC NTP RECEIVE";
+   dump msg; 
+
+let 0xdc -> n1 in
+let 0x40 -> n2 in
+let 0x55 -> n3 in
+let 0x7c -> n4 in
+
+ let n4 + n3*256 + n2*65536 + n1*16777216 -> Seconds in
+ (
+Secho "SECONDI; ";
+ Iecholn  Seconds;
+ 
+0);
+nil;;
+
+fun beep =
+  if beepbeep=="1" then
+    controlsound midi_plip;
+0;;
+
 fun checktime sec=
 if sec == 0 then 
   0
@@ -798,8 +833,9 @@ else if sec == 79200 then
   22
 else if sec == 82800 then 	
   23
-else if sec == 86400 then 	
-  24
+else if sec == 86400 then( 	
+set day_life= day_life+86400;  
+24)
 else nil  
 ;;
 // ********************************
@@ -935,6 +971,7 @@ let strget msg 0 -> tipo_header in (
     /// let strstr topics mqtt_topic 0 -> si in	 // topic correct?
         Secholn cmd_msg;
         set nudda=1;
+        beep;
 		// *****************************
 		// * CHECK COMMAND
 		// *****************************
@@ -1071,6 +1108,7 @@ let strget msg 0 -> tipo_header in (
 0);
 if(nudda==1) then
  set xSession.sGate.pBuffer = nil;
+
  let strstr xSession.sGate.pBuffer "<message" 0 -> stream_pos in	
  if (stream_pos != nil) then (
    set xSession.sGate.pSId = "1234"; //??
@@ -1079,6 +1117,8 @@ if(nudda==1) then
    //XmppSessionSetStatus xSession ssFree;//sLoggedin;
    set xSession.sState = ssFree;
  0);
+
+
 /*
 const RGB_WHITE  = 0xffffff ;;
 const RGB_BLACK  = 0x000000 ;;
@@ -1653,10 +1693,14 @@ Secholn "CC XmppGateStreamOpened";
 
 fun XmppGateStreamClosed xSession Mode =
 	// la connection a déconné. On pourrait essayer de gentiment relancer la connection, mais le plus efficace est de simplement rebooter le bunny.
-	Xw "gate stream closed, rebooting";
+	Secholn "CC retry";
+	set xSession.sGate = nil;
+    	XmppGateConnect xSession;  
+0;;
+/*	Xw "gate stream closed, rebooting";
 	reboot 0x0407FE58 0x13fb6754
 ;;
-
+*/
 // SEND SOMETHING IN TCP OR BOSH
 fun XmppGateSend xSession xData =
 	Xw strcatlist "Sending : "::xData::"(end)"::nil;
@@ -1683,7 +1727,7 @@ fun XmppGateSend xSession xData =
 fun XmppGateIdle xSession=
 //Secholn "CC XMPPGATEIDLE";
 if (!strcmp clock "1") then (
-  let time_base + time -> z in
+  let (time_base + time) - day_life -> z in
   if asp!=z then (
     let checktime z -> now in
     if now != nil then (
@@ -1693,12 +1737,11 @@ if (!strcmp clock "1") then (
         mqtt_publish_fun XmppGlobalSession mqtt_topic dato
      ) else (
 //      controlsound cucu; now
-if now > 11 then set now=now-12;
-let cucu->allcucu in (
-for z=0;z<now do
- set allcucu=strcat allcucu cucu;
-        wavstartlocalEx allcucu::nil 100;
-      
+        if now > 12 then set now=now-12;
+          let cucu->allcucu in (
+           for z=1;z<now do
+             set allcucu=strcat allcucu cucu;
+           wavstartlocalEx allcucu::nil 100;      
 	  0);
      0);
     nil);
@@ -3936,6 +3979,9 @@ fun _configcbhttp http res=
             //
 			set sleep_clock=listswitchstr conf "sleep_clock";
 			set wakeup_clock=listswitchstr conf "wakeup_clock";
+
+			set beepbeep=listswitchstr conf "beep";
+                        set ntp_server=listswitchstr conf "ntp_server";
             //
 			set b1t=listswitchstr conf "b1_topic";
 			set b1m=listswitchstr conf "b1_msg";
@@ -3962,6 +4008,22 @@ fun _configcbhttp http res=
 			  set sleep_time = set_time sleep_clock "SLEEPTIME=";
 			if (wakeup_clock!=nil) then	
 			  set wakeup_time = set_time wakeup_clock "WAKEUPTIME=";
+
+
+			if (ntp_server==nil) then
+			  set ntp_server="\213\251\52\250";
+
+ let strstr ntp_server "." 0 -> dot_pos1 in	 
+ let strsub ntp_server 0 dot_pos1 -> ip1 in  
+   let strstr ntp_server "." dot_pos1+1 -> dot_pos2 in	 
+   let strsub ntp_server dot_pos1+1 dot_pos2-(dot_pos1+1) -> ip2 in    
+    let strstr ntp_server "." dot_pos2+1 -> dot_pos3 in	 
+    let strsub ntp_server dot_pos2+1 dot_pos3-(dot_pos2+1) -> ip3 in     
+     let strsub ntp_server dot_pos3+1 strlen ntp_server -> ip4 in
+       set ntp_srv = strcatlist (ctoa atoi ip1)::(ctoa atoi ip2)::(ctoa atoi ip3)::(ctoa atoi ip4)::nil;
+
+
+
             //			  
 			if (mqtt_topic_out==nil) then
 			   let strcat "/" (webmac netMac) -> z in
@@ -3986,6 +4048,18 @@ fun _configcbhttp http res=
 					reboot 0x0407FE58 0x13fb6754;
 					0
 				);
+
+//CC TEST NTP
+//* ******
+regudp 123 #cbnetntp;
+Secholn "NTP SEND";
+//let "\213\251\52\250" -> ntpserver in
+
+//let "\$d9\$00\$0a\$fa\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0"->trama in
+let "\$1b\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0\$0"->trama in
+udpsend netip 123 ntp_srv 123 trama nil;
+//***** */
+
 
 			set run = xmppLoginRun;
 		
