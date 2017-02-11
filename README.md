@@ -27,34 +27,65 @@ macaddressconiglio.jsp
 campi separati da uno spazio
 
 mqtt_port porta del server broker
+
 mqtt_broker nome del server broker con la porta di connessione ( https://www.cloudmqtt.com/ offre un servizio free o anche http://www.mqtt-dashboard.com/)
+
 mqtt_user eventuale utente
+
 mqtt_password eventuale password
+
 mqtt_clientID nome del client mqtt deve essere unico per server (se non specificato usa il mac address del coniglio)
+
 mqtt_topic topic dei comandi da inviare (se non specificato usa il mac address più /in: /123456789012/in)
+
 mqtt_topic_out topic dei comandi che il coniglio invia (se non specificato usa il mac address più /out: /123456789012/out)
+
 clock 1 attiva orologio (segnala ad ogni ora) - 0 niente orologio
+
 alarm 1 attiva la sveglia - 0 sveglia non attiva
+
 clock_msg specifica il messaggio per ogni ora (se non specificato emette un suono)
-tts_url indirizzo per trasformare testo in mp3 (es: http://www.voicerss.org/ offre un servizio gratuito bisogna registrarsi e inserire la key e gli altri parametri nell'url)
+
+tts_url indirizzo per trasformare testo in mp3 (es: http://www.voicerss.org/ offre un servizio gratuito bisogna registrarsi e inserire la 
+key e gli altri parametri nell'url)
+
 alarm_msg messaggio della sveglia (se non specificato emette un suono)
+
 time_clock imposta ora formato hhmmss ora minuti secondi senza spazi se impostate il server ntp non usatelo
+
 alarm_clock imposta sveglia hhmmss
+
 sleep_clock imposta l'ora della nanna hhmmss
+
 wakeup_clock imposta l'ora della sveglia hhmmss
-ojn_url http://openznab.it/ojn/FR/api.jsp?sn=macaddressbunny=13287162317639162376273678236722& server openjabnab parte fissa, al quale poter mandare comandi violet
+
+ojn_url http://openznab.it/ojn/FR/api.jsp?sn=macaddressbunny=13287162317639162376273678236722& server openjabnab parte fissa, al quale poter 
+mandare comandi violet
+
 ntp_server ip del server ntp
+
 tmz numero timezone
+
 tms segno + o - timezone
+
 b1_topic (topic per quando si preme il bottone, 1 click)
+
 b1_msg (messaggio per quando si preme il bottone, 1 click)
+
 b2_topic (topic per quando si preme il bottone, 2 click)
+
 b2_msg (messaggio per quando si preme il bottone, 2 click)
+
 ears_topic (topic per quando si muovono le orecchie)
+
 ears_msg (messaggio per quando si muovono le orecchie)
+
 rfid1 (codice rfid)
+
 rfid1_topic (topic per quando annusa rfid1)
+
 rfid1_msg (messaggio per quando annusa rfid1)
+
 
 
 
@@ -87,23 +118,41 @@ varie:
 comandi inviabili tramite client mqtt al topic (per esempio) /123456789012/in
 
 EARS;R=1;L=2; (muove le orecchie right di 1 e left di 1)
+
 TIME=100000 (imposta l'orologio alle 10 00 00)
+
 SLEEPTIME=201200 (imposta l'ora per andare a letto alle 20 12 00)
+
 WAKEUPTIME=080200 (imposta l'ora in cui si sveglia alle 08 02 00)
+
 ALLARMCLOCK=130000 (imposta l'ora della sveglia alle 13 00 00)
+
 AMSG=MSG=YUPPY! (imposta il messaggio da inviare per la sveglia)
+
 RD=http://str01.fluidstream.net:7020; (attiva la radio dal sito)
+
 MSG=BLABLABLA (dice blablabla)
+
 MP3=http://miosito.com/x.mp3 (suona il brano mp3 dal sito)
+
 BOOT; (esegue il pacchetto di boot .. reset)
+
 WAKEUP; (alzati!)
+
 SLEEP; (dormi!)
+
 TAICHI=255 (imposta la frequenza del taichi da 0=niente a 255=molto)
+
 RAW=0000 (pacchetto grezzo vedi *)
+
 BREATH=5 (colore respirazione da 0 a 7)
+
 NOSE=0 (lampeggio naso 0 no 1 un lampeggio 2 doppio lampeggio)
+
 TIME? dice ora minuti e secondi attuali
+
 OJN=tts=Buongiono+sono+io invia al server openjabnab il comando tts etc
+
 
 
 
