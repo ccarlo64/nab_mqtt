@@ -1245,7 +1245,7 @@ fun XmppTcpRead t val msg xSession =
 			(pInStream -> // Now we are in the stream so normal parsing
                 set xSession.sGate.pBuffer = strcatlist xSession.sGate.pBuffer::msg::nil;
 // CC DEBUG
-			    dump msg;
+//			    dump msg;
 //			   
 				//set xSession.sGate.pBuffer = strcatlist xSession.sGate.pBuffer::msg::nil;	// Mise à jour du buffer d'entrée
 				
@@ -1295,14 +1295,15 @@ fun XmppTcpRead t val msg xSession =
 // * CC check response to other
 // ******************************
 
-Secholn "BUFFER NOT EMPTY...";
+Secho "b";//BUFFER NOT EMPTY...";
 //set xSession.sGate.pBuffer="<message from='net.openjabnab.platform@openznab.it/services' to='000e8e2d053f@openznab.it/boot' id='OJaNa-6005'><packet xmlns='violet:packet' format='1.0' ttl='604800'>fwQAAA5////+BAAFAAgACQQO/wsAAAEA/w==</packet></message>";
 // *********
 // * PING
 // *********
 if(!strcmp msg strcatlist MQTT_PINGRESP::nil) then (       //"\$D0\$00"    
-  Secholn "CC response PING";
-  dump xSession.sGate.pBuffer;
+//  Secholn "CC response PING";
+Secho "p";
+//  dump xSession.sGate.pBuffer;
   set xSession.sGate.pBuffer = nil;
 0);
 // *********
@@ -1593,8 +1594,9 @@ fun XmppTcpIdle xSession =
 ///printev;
 	if time - xSession.sLastIOTime > XmppTcpIdleTime then (
 // CC PING MQTT
+Secho "P";
       let strcatlist MQTT_PINGREQ::nil -> mqttPing in (
-   	     dump mqttPing;
+//   	     dump mqttPing;
 	     XmppGateSend xSession mqttPing 
 	 )
 //		XmppGateSend xSession " "
@@ -2175,10 +2177,13 @@ set asp1=nil;
 */
 if asp1>0 then 
   set asp1 = asp1 -1;
+
 if asp>0 then 
   set asp = asp -1;
+
 if asp2>0 then 
   set asp2 = asp2 -1;
+
 if asp3>0 then 
   set asp3 = asp3 -1;
 
@@ -2186,10 +2191,8 @@ if asp3>0 then
   if (!strcmp alarm "1") && (gSleepState == 0) then (
     let (time_base + time) - day_life -> z in
     if z==alarm_time then (
-
-if asp1==nil || asp1==0 then (
-set asp1=2000;
-
+     if asp1==nil || asp1==0 then (
+       set asp1=20;
      // if asp1!=z then (
    //    set asp1=z;
        Secholn "midiclock";
@@ -2205,8 +2208,8 @@ set asp1=2000;
   if(sleep_time!=nil) then
     let (time_base + time) - day_life -> z in
      if z==sleep_time then
-    if asp2==nil || asp2==0 then (
-     set asp2=2000;
+      if asp2==nil || asp2==0 then (
+       set asp2=20;
 //       if asp2!=z then (
 //       set asp2=z;
        mqtt_publish_fun XmppGlobalSession mqtt_topic "SLEEP;";
@@ -2215,9 +2218,8 @@ set asp1=2000;
   if(wakeup_time!=nil) then
     let (time_base + time) - day_life -> z in
      if z==wakeup_time then
-    if asp3==nil || asp3==0 then (
-     set asp3=2000;
-
+      if asp3==nil || asp3==0 then (
+       set asp3=20;
 //      if asp3!=z then (
   //     set asp3=z;
        mqtt_publish_fun XmppGlobalSession mqtt_topic "WAKEUP;";
@@ -2228,8 +2230,8 @@ if (!strcmp clock "1") && (gSleepState == 0) then (
  let (time_base + time) - day_life -> z in
   let checktime z -> now in
    if now != nil then 
-    if asp1==nil || asp1==0 then (
-     set asp1=2000;
+    if asp==nil || asp==0 then (
+     set asp=20;
      if clock_msg!=nil then (
       let strcat clock_msg (itoa now) -> dato in
         mqtt_publish_fun XmppGlobalSession mqtt_topic dato
@@ -3030,7 +3032,7 @@ let strcat d2 (itoa rightValue) -> dato in
 fun XmppSessionRequestResource newRes =
 	Xw strcatlist "RequestResource!"::newRes::nil;
 //CC
-Secholn "I DON'T KNOW";
+Secholn "CC RequestResource ignored";
 	/* REQUEST RESOURCE NOW */
 /*CC
 	let XmppGlobalSession -> xSession in
