@@ -81,7 +81,7 @@ var tmz;;
 var tms;;
 var ntp_srv;;
 var day_life=0;;
-var beepbeep;;
+//var beepbeep;;
 
 var sleep_clock;;
 var sleep_time;;
@@ -95,6 +95,7 @@ var alarm_time;;
 var time_clock;;
 
 var time_base=0;;
+var parameters;;
 var clock="0";;
 var asp=0;;
 var asp1=0;;
@@ -1134,12 +1135,13 @@ Secho "SECONDI; ";
 */
 0);//let totale
 nil;;
-
+/*
 fun beep =
-  if beepbeep=="1" then
+if(!strcmp beepbeep "1") then          
+  //if beepbeep=="1" then
     controlsound midi_plip;
 0;;
-
+*/
 // +1 day
 fun gginc=
  if (CurrentYear%4==0) then
@@ -1484,7 +1486,7 @@ let bytetolen msg -> lenMsg in
     /// let strstr topics mqtt_topic 0 -> si in	 // topic correct?
         Secholn cmd_msg;
         set nudda=1;
-        beep;
+//        beep;
 		// *****************************
 		// * CHECK COMMAND
 		// *****************************
@@ -2317,13 +2319,17 @@ fun XmppGateConnect xSession =
 						else
 						(
 							// Mauvais port, on lance la requete SRV
-							DnsSrv strcatlist "_xmpp-client._tcp."::xSession.sDomain::nil fixarg3 #XmppTcpOpen xSession		// et on lance la première requête
+Secholn "CC dns request 1";                            
+dnsreq xSession.sDomain fixarg2 fixarg3 #XmppTcpOpen xSession XmppServerPort                           
+//CC		DnsSrv strcatlist "_xmpp-client._tcp."::xSession.sDomain::nil fixarg3 #XmppTcpOpen xSession		// et on lance la première requête
 						)
 					)
 				)
 				else
 				(
-					DnsSrv strcatlist "_xmpp-client._tcp."::xSession.sDomain::nil fixarg3 #XmppTcpOpen xSession		// et on lance la première requête
+Secholn "CC dns request 2";
+dnsreq xSession.sDomain fixarg2 fixarg3 #XmppTcpReOpen xSession XmppServerPort                
+//CC			DnsSrv strcatlist "_xmpp-client._tcp."::xSession.sDomain::nil fixarg3 #XmppTcpOpen xSession		// et on lance la première requête
 				);
 				0
 			);
@@ -2397,7 +2403,7 @@ fun XmppGateStreamClosed xSession Mode =
 	Secholn "CC retry";
 
 let [pParent:xSession pMode:pTcp pStatus:pOpening pTry:3 pTcpV:nil pBoshV:nil pActualMode:nil] -> newGate in	// On crée la structure XmppGate
-  set xSession.sGate = newGate;	
+//  set xSession.sGate = newGate;	
 	set xSession.sGate = nil;
     	XmppGateConnect xSession;  
 0;;
@@ -2416,12 +2422,15 @@ fun XmppGateSend xSession xData =
 		if ( (XmppTcpSend xSession xData) == nil ) then 
 			XmppGateStreamClosed xSession xSession.sGate.pMode;     // Stream Closed, problem!
 		nil
-	) | (pBosh ->
+	) 
+//CC
+/*| (pBosh ->
 		if ( (XmppBoshSend xSession xData) == nil ) then (
 			Xw "We are deconnected (stream closed in Bosh)";
 			XmppSessionIsDisconnected xSession
 		);
-		nil);
+		nil)*/
+;
 0;;
 
 
@@ -2996,6 +3005,7 @@ fun xmpps_getNextStanzaId xSession =
  * Content	contenu de la stanza ou nil (pas de sous-élément)
  */
 fun xmpps_createStanza xSession From To Type Content =
+
 	let (match Type with							// Si on a un iq (set, get), presence ou message
 		(stanzaIQGet -> ["iq" " type='get'"])
 		|(stanzaIQSet -> ["iq" " type='set'"])
@@ -3013,7 +3023,8 @@ fun xmpps_createStanza xSession From To Type Content =
 			(if(From != nil) then strcatlist " from='"::From::"'"::nil else "")::
 			(if(To != nil) then strcatlist " to='"::To::"'"::nil else "")::
 			Attributes::" id='"::Id::"'>"::Content::"</"::ElementType::">"::nil
-	)
+	) 
+
 ;;
 
 /**
@@ -4789,7 +4800,7 @@ fun _configcbhttp http res=
 			set sleep_clock=listswitchstr conf "sleep_clock";
 			set wakeup_clock=listswitchstr conf "wakeup_clock";
 
-			set beepbeep=listswitchstr conf "beep";
+			
                         set ntp_server=listswitchstr conf "ntp_server";
                         set tmz=listswitchstr conf "tmz";
                         set tms=listswitchstr conf "tms";
@@ -4834,6 +4845,7 @@ for i=0;i<tablen rfidtab_msg do
 			//
 /* mouth name array */
 set month=listswitchstr conf "month";
+set month=strcat "dummy$" month;
 Secho "elementi array "; Iecholn conta month "$";
 set monthname=tabnew nil conta month "$";
 set monthname=stringtotab month "$" monthname;
@@ -4841,8 +4853,16 @@ for i=0;i<tablen monthname do
   Secholn monthname.i;
 
 //
+//                        set beepbeep=listswitchstr conf "beep";
 			set clock=listswitchstr conf "clock";
 			set alarm=listswitchstr conf "alarm";
+/*
+set parameters=listswitchstr conf "parameters";
+set clock=ctoa (strget parameters 0);
+set alarm=ctoa (strget parameters 1);
+set beepbeep=ctoa (strget parameters 2);
+Secho "clock="; Secho clock; Secho " alarm="; Secho alarm; Secho " beepbeep="; Secho beepbeep;
+*/
 			set clock_msg=listswitchstr conf "clock_msg";
 			set alarm_msg=listswitchstr conf "alarm_msg";
 			if (time_clock!=nil) then
