@@ -1,0 +1,157 @@
+
+fun sottrae addend1 addend2=
+set buf ="";
+    let 0->digit in
+    let 0->digit1 in
+    let 0->digit2 in
+    let (strlen addend1) - 1 -> i1 in
+	let (strlen addend2) - 1 -> i2 in
+	let 0 -> carry in	
+	while ( i1 >= 0 || i2 >= 0 || carry != 0) do (
+	   if i1<0 then
+	     set digit1=0
+	   else 
+        set digit1 = (strget addend1 i1 ) -48;
+	   if i2 < 0 then
+	    set digit2 = 0
+	   else
+        set digit2 = (strget addend2 i2) -48;
+
+        set digit1 = digit1 - carry;
+        if (digit1 >= digit2) then (
+		  set digit = digit1 - digit2;
+		  set carry = 0
+		) else (
+        //
+          if (i1>0) then ( 
+            set digit = 10 + digit1 - digit2;
+		    set carry=1
+          ) else ( 
+            set i1=-99;
+            set i2=-99;
+            set carry=0
+            );
+		0);
+        if i1>=0 then set buf=strcat ctoa (digit+48) buf else set buf=nil;
+        set i1 = i1 -1;
+		set i2 = i2 -1;
+    0); //while
+  
+buf;;	
+/*
+fun sottrae addend1 addend2=
+set buf ="";
+    let 0->digit in
+    let 0->digit1 in
+    let 0->digit2 in
+    let (strlen addend1) - 1 -> i1 in
+	let (strlen addend2) - 1 -> i2 in
+	let 0 -> carry in	
+	while ( i1 >= 0 || i2 >= 0 || carry != 0) do (
+	   if i1<0 then
+	     set digit1=0
+	   else 
+        set digit1 = (strget addend1 i1 ) -48;
+	   if i2 < 0 then
+	    set digit2 = 0
+	   else
+        set digit2 = (strget addend2 i2) -48;
+
+        set digit1 = digit1 - carry;
+        if (digit1 >= digit2) then (
+		  set digit = digit1 - digit2;
+		  set carry = 0
+		) else (
+          set digit = 10 + digit1 - digit2;
+		  set carry=1
+		);
+        set buf=strcat ctoa (digit+48) buf;
+        set i1 = i1 -1;
+		set i2 = i2 -1;
+    0); //while
+  
+buf;;	
+*/
+fun dividi2 a=
+set buf="";
+let 0->i in
+let "0"->resto in
+let ""->a1 in
+while ( i<strlen a) do (
+	 set a1= strcat resto ctoa ((strget a i ));
+	 set i=i+1;
+	 while ((atoi a1) < 2 && i< (strlen a)) do (
+	  set a1 = strcat a1 ctoa ((strget a i ));
+	  set i= i+1;
+      set buf= strcat buf "0";	  
+	 0);
+	 set buf =strcat buf ctoa (((atoi a1 )/2)+48);
+	 set resto = ctoa (((atoi a1 )%2) +48);
+ 0);
+buf;;
+ 
+fun somma addend1 addend2=
+set buf ="";
+    let 0->digit in
+    let 0->digit1 in
+    let 0->digit2 in
+    let (strlen addend1) - 1 -> i1 in
+	let (strlen addend2) - 1 -> i2 in
+	let 0 -> carry in
+		
+	while ( i1 >= 0 || i2 >= 0 || carry != 0) do (
+
+	   if i1<0 then
+	     set digit1=0
+	   else 
+        set digit1 = (strget addend1 i1 ) -48;
+	   if i2 < 0 then
+	    set digit2 = 0
+	   else
+        set digit2 = (strget addend2 i2) -48;
+	   set digit = digit1 + digit2 + carry;
+        if digit > 9 then (
+            set carry = 1;
+            set digit = digit - 10
+        ) else (
+            set carry = 0
+        );
+        set buf=strcat ctoa (digit+48) buf;
+        set i1 = i1 -1;
+		set i2 = i2 -1;
+    0); //while
+  
+buf;;	
+
+
+fun moltiplica per m=
+
+let ""->n1 in
+let ""->n2 in
+let ""->n3 in
+let ""->molt in
+let  "0"->risultato in (
+
+for i=0;i<(strlen m) do
+ set molt= strcat ctoa (strget m i) molt;
+ 
+for i=0; i<((strget molt 0)-48) do (
+  set risultato=somma risultato per );
+
+set n3=risultato;
+set risultato="0";
+for i=0; i<((strget molt 1)-48) do (
+  set risultato=somma risultato per);
+
+set n2=strcat risultato "0"; 
+set risultato="0";
+for i=0; i<((strget molt 2)-48) do (
+  set risultato=somma risultato per);
+  
+set n1=strcat risultato "00"; 
+
+set risultato = somma n1 n2;
+set risultato = somma risultato n3;
+risultato );;
+
+
